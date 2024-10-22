@@ -28,8 +28,13 @@ import type {
 	Order,
 	Product,
 } from './client.types.ts';
+import productsData from '../../data/products.json';
+import collectionsData from '../../data/collections.json';
 
 export * from './client.types.ts';
+
+const collections: Record<string, Collection> = collectionsData;
+const products: Record<string, Product> = productsData as Record<string, Product>; // TBD handle exact type matching
 
 export const getProducts = <ThrowOnError extends boolean = false>(
 	options?: Options<GetProductsData, ThrowOnError>,
@@ -136,162 +141,6 @@ export const getOrderById = <ThrowOnError extends boolean = false>(
 		return error as RequestResult<GetOrderByIdResponse, GetOrderByIdError, ThrowOnError>;
 	}
 	return asResult(order);
-};
-
-const collectionDefaults = {
-	createdAt: new Date().toISOString(),
-	updatedAt: new Date().toISOString(),
-	deletedAt: null,
-};
-
-const collections: Record<string, Collection> = {
-	apparel: {
-		id: 'apparel',
-		name: 'Apparel',
-		description: 'Wear your love for Astro on your sleeve.',
-		slug: 'apparel',
-		imageUrl: '/assets/shirts.png',
-		...collectionDefaults,
-	},
-	stickers: {
-		id: 'stickers',
-		name: 'Stickers',
-		description: 'Load up those laptop lids with Astro pride.',
-		slug: 'stickers',
-		imageUrl: '/assets/astro-sticker-pack.png',
-		...collectionDefaults,
-	},
-	bestSellers: {
-		id: 'bestSellers',
-		name: 'Best Sellers',
-		description: "You'll love these.",
-		slug: 'best-sellers',
-		imageUrl: '/assets/astro-houston-sticker.png',
-		...collectionDefaults,
-	},
-};
-
-const defaultVariant = {
-	id: 'default',
-	name: 'Default',
-	stock: 20,
-	options: {},
-};
-
-const apparelVariants = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'].map((size, index) => ({
-	id: size,
-	name: size,
-	stock: index * 10,
-	options: {
-		Size: size,
-	},
-}));
-
-const productDefaults = {
-	description: '',
-	images: [],
-	variants: [defaultVariant],
-	discount: 0,
-	createdAt: new Date().toISOString(),
-	updatedAt: new Date().toISOString(),
-	deletedAt: null,
-};
-
-const products: Record<string, Product> = {
-	'astro-icon-zip-up-hoodie': {
-		...productDefaults,
-		id: 'astro-icon-zip-up-hoodie',
-		name: 'Astro Icon Zip Up Hoodie',
-		slug: 'astro-icon-zip-up-hoodie',
-		tagline:
-			'No need to compress this .zip. The Zip Up Hoodie is a comfortable fit and fabric for all sizes.',
-		price: 4500,
-		imageUrl: '/assets/astro-zip-up-hoodie.png',
-		collectionIds: ['apparel', 'bestSellers'],
-		variants: apparelVariants,
-	},
-	'astro-logo-curve-bill-snapback-cap': {
-		...productDefaults,
-		id: 'astro-logo-curve-bill-snapback-cap',
-		name: 'Astro Logo Curve Bill Snapback Cap',
-		slug: 'astro-logo-curve-bill-snapback-cap',
-		tagline: 'The best hat for any occasion, no cap.',
-		price: 2500,
-		imageUrl: '/assets/astro-cap.png',
-		collectionIds: ['apparel'],
-	},
-	'astro-sticker-sheet': {
-		...productDefaults,
-		id: 'astro-sticker-sheet',
-		name: 'Astro Sticker Sheet',
-		slug: 'astro-sticker-sheet',
-		tagline: "You probably want this for the fail whale sticker, don't you?",
-		price: 1000,
-		imageUrl: '/assets/astro-universe-stickers.png',
-		collectionIds: ['stickers'],
-	},
-	'sticker-pack': {
-		...productDefaults,
-		id: 'sticker-pack',
-		name: 'Sticker Pack',
-		slug: 'sticker-pack',
-		tagline: 'Jam packed with the most popular stickers.',
-		price: 500,
-		imageUrl: '/assets/astro-sticker-pack.png',
-		collectionIds: ['stickers', 'bestSellers'],
-	},
-	'astro-icon-unisex-shirt': {
-		...productDefaults,
-		id: 'astro-icon-unisex-shirt',
-		name: 'Astro Icon Unisex Shirt',
-		slug: 'astro-icon-unisex-shirt',
-		tagline: 'A comfy Tee with the classic Astro logo.',
-		price: 1775,
-		imageUrl: '/assets/astro-unisex-tshirt.png',
-		collectionIds: ['apparel'],
-		variants: apparelVariants,
-	},
-	'astro-icon-gradient-sticker': {
-		...productDefaults,
-		id: 'astro-icon-gradient-sticker',
-		name: 'Astro Icon Gradient Sticker',
-		slug: 'astro-icon-gradient-sticker',
-		tagline: "There gradi-ain't a better sticker than the classic Astro logo.",
-		price: 200,
-		imageUrl: '/assets/astro-icon-sticker.png',
-		collectionIds: ['stickers', 'bestSellers'],
-	},
-	'astro-logo-beanie': {
-		...productDefaults,
-		id: 'astro-logo-beanie',
-		name: 'Astro Logo Beanie',
-		slug: 'astro-logo-beanie',
-		tagline: "There's never Bean a better hat for the winter season.",
-		price: 1800,
-		imageUrl: '/assets/astro-beanie.png',
-		collectionIds: ['apparel', 'bestSellers'],
-	},
-	'lighthouse-100-sticker': {
-		...productDefaults,
-		id: 'lighthouse-100-sticker',
-		name: 'Lighthouse 100 Sticker',
-		slug: 'lighthouse-100-sticker',
-		tagline: 'Bad performance? Not in my (light) house.',
-		price: 500,
-		imageUrl: '/assets/astro-lighthouse-sticker.png',
-		collectionIds: ['stickers'],
-	},
-	'houston-sticker': {
-		...productDefaults,
-		id: 'houston-sticker',
-		name: 'Houston Sticker',
-		slug: 'houston-sticker',
-		tagline: 'You can fit a Hous-ton of these on any laptop lid.',
-		price: 250,
-		discount: 100,
-		imageUrl: '/assets/astro-houston-sticker.png',
-		collectionIds: ['stickers', 'bestSellers'],
-	},
 };
 
 function asResult<T>(data: T) {

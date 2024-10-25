@@ -31,5 +31,5 @@ export function input({
 }
 
 export function card({ className }: { className?: ClassNameValue } = {}) {
-	return twMerge('relative flex bg-theme-base-100', className);
+	return twMerge('relative flex', className);
 }

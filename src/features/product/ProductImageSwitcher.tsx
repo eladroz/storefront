@@ -26,7 +26,7 @@ export function ProductImageSwitcher(props: ProductImageSwitcherProps) {
 								setCurrentImageIndex(index());
 							}}
 							class={twMerge(
-								'relative aspect-square h-20 flex-shrink-0 border border-theme-base-200 bg-theme-base-100 p-1 first:mt-auto last:mb-auto',
+								'relative aspect-square h-20 flex-shrink-0 border border-theme-base-200 p-1 first:mt-auto last:mb-auto',
 								index() === currentImageIndex() && 'border-theme-base-900',
 							)}
 							type="button"

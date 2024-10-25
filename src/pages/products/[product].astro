@@ -25,7 +25,6 @@ if (productResponse.error) {
 }
 
 const product = productResponse.data;
-
 const productImageSrcs = [product.imageUrl, ...product.images.map((it) => it.url)];
 const productImages = await Promise.all(
 	productImageSrcs.map((src) =>
@@ -111,6 +110,7 @@ if (!firstImage) throw new Error(`No images found for product ${id}`);
 		<ProductCarouselSection
 			heading="You might also like"
 			filterProducts={(products) => products.filter(({ id }) => id !== product.id)}
+			collectionId={product.collectionIds?.[0]}
 		/>
 
 		<CollectionSection />

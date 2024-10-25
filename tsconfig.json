@@ -1,11 +1,12 @@
 {
 	"extends": "astro/tsconfigs/strictest",
-	"include": ["src", "astro.config.ts", "openapi-ts.config.ts"],
+	"include": ["src", "astro.config.ts", "openapi-ts.config.ts", "db"],
 	"compilerOptions": {
 		"exactOptionalPropertyTypes": false,
 		"baseUrl": ".",
 		"paths": {
 			"~/*": ["./src/*"],
+			"@data/*": ["./data/*"],
 			"storefront:client": ["./src/lib/client.mock.ts"]
 		},
 		"jsx": "preserve",

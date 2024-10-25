@@ -7,17 +7,19 @@ import ProductCarousel, { MEASURED_ITEM_ID, GAP } from './ProductCarousel.tsx';
 type Props = {
 	heading: string;
 	filterProducts?: (products: Product[]) => Product[];
+	collectionId?: string;
 };
 
-const MAX_PRODUCTS = 20;
-
-const { heading, filterProducts = (products) => products } = Astro.props;
-
-const productsResponse = await getProducts();
-const productsInStock = filterProducts(productsResponse.data?.items ?? []).filter(
-	(product) => getProductStock(product) > 0,
+const { heading, filterProducts = (products: Product[]) => products, collectionId } = Astro.props;
+const productsResponse = await getProducts({
+	query: {
+		limit: 10,
+		collectionId,
+	},
+});
+const products = filterProducts(productsResponse.data?.items ?? []).filter(
+	(product: Product) => getProductStock(product) > 0,
 );
-const products = productsInStock.sort(() => 0.5 - Math.random()).slice(0, MAX_PRODUCTS);
 ---
 
 <ProductCarousel {heading} client:idle>

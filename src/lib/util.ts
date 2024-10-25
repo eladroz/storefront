@@ -22,3 +22,9 @@ function safeStringify(value: unknown): string {
 export function clamp(num: number, lower: number, upper: number) {
 	return Math.max(lower, Math.min(num, upper));
 }
+
+export function productIdFromVariantId(productVariantId: string): string {
+	const idElements = productVariantId.split('|');
+	if (idElements.length !== 2) throw new Error(`Invalid productVariantId: ${productVariantId}`);
+	return idElements[0]!;
+}

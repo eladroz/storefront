@@ -1,14 +1,18 @@
 import { type Product, getProducts } from 'storefront:client';
 import type { AstroCookies } from 'astro';
 import { type Cart, type CartData, cartDataSchema, expandLineItem } from './cart.ts';
+import { productIdFromVariantId } from '~/lib/util.ts';
 
 export function parseCartData(input: unknown): CartData {
 	return cartDataSchema.catch(() => ({ items: [] })).parse(input);
 }
 
 export async function expandCartData(cartData: CartData): Promise<Cart> {
+	const productIds = cartData.items.map((item) => {
+		return productIdFromVariantId(item.productVariantId);
+	});
 	const productsResponse = await getProducts({
-		query: {},
+		query: { ids: productIds },
 	});
 	if (!productsResponse.data) {
 		throw new Error('Failed to fetch products', { cause: productsResponse.error });

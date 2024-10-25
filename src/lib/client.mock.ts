@@ -85,7 +85,7 @@ export const getProducts = async (
 	}
 
 	if (filter === baseFilter && !options?.query?.limit)
-		console.warn('getProducts called without any filters or limit - not great for performance.');
+		console.trace('getProducts called without any filters or limit, options:', options);
 
 	console.time('Fetching products from DB');
 	const dbItems: DbProduct[] = await query;

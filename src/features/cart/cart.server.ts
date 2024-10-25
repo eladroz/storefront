@@ -8,6 +8,8 @@ export function parseCartData(input: unknown): CartData {
 }
 
 export async function expandCartData(cartData: CartData): Promise<Cart> {
+	if (!cartData.items.length) return { items: [] };
+
 	const productIds = cartData.items.map((item) => {
 		return productIdFromVariantId(item.productVariantId);
 	});

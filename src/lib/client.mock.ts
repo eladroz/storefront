@@ -67,9 +67,6 @@ export const getProducts = async (
 		}
 	}
 
-	if (filter === baseFilter)
-		console.warn('getProducts called without any filters - not great for performance.');
-
 	// Build filtered query, but allow further refinement to the builder
 	let query = db.select().from(ProductsTable).where(filter).$dynamic();
 
@@ -86,6 +83,9 @@ export const getProducts = async (
 					: ProductsTable.updatedAt;
 		query = query.orderBy(options.query.order === 'asc' ? asc(sortColumn) : desc(sortColumn));
 	}
+
+	if (filter === baseFilter && !options?.query?.limit)
+		console.warn('getProducts called without any filters or limit - not great for performance.');
 
 	console.time('Fetching products from DB');
 	const dbItems: DbProduct[] = await query;

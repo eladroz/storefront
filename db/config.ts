@@ -17,7 +17,20 @@ const ProductsTable = defineTable({
 	},
 });
 
+const CollectionsTable = defineTable({
+	columns: {
+		id: column.text({ primaryKey: true }),
+		name: column.text(),
+		description: column.text(),
+		slug: column.text({ optional: true }),
+		imageUrl: column.text({ optional: true }),
+		createdAt: column.date(),
+		updatedAt: column.date(),
+		deletedAt: column.date({ optional: true }),
+	},
+});
+
 // https://astro.build/db/config
 export default defineDb({
-	tables: { ProductsTable },
+	tables: { ProductsTable, CollectionsTable },
 });

@@ -23,6 +23,10 @@ export function clamp(num: number, lower: number, upper: number) {
 	return Math.max(lower, Math.min(num, upper));
 }
 
+export function inplaceShuffle(arr: any[]) {
+	return arr.sort(() => Math.random() - Math.random());
+}
+
 export function productIdFromVariantId(productVariantId: string): string {
 	const idElements = productVariantId.split('|');
 	if (idElements.length !== 2) throw new Error(`Invalid productVariantId: ${productVariantId}`);

@@ -3,6 +3,7 @@ import { type Product, getProducts } from 'storefront:client';
 import { getProductStock } from '~/lib/products.ts';
 import ProductCard from './ProductCard.astro';
 import ProductCarousel, { MEASURED_ITEM_ID, GAP } from './ProductCarousel.tsx';
+import { inplaceShuffle } from '~/lib/util.ts';
 
 type Props = {
 	heading: string;
@@ -13,13 +14,14 @@ type Props = {
 const { heading, filterProducts = (products: Product[]) => products, collectionId } = Astro.props;
 const productsResponse = await getProducts({
 	query: {
-		limit: 10,
+		limit: 20,
 		collectionId,
 	},
 });
-const products = filterProducts(productsResponse.data?.items ?? []).filter(
+let products = filterProducts(productsResponse.data?.items ?? []).filter(
 	(product: Product) => getProductStock(product) > 0,
 );
+products = inplaceShuffle(products).slice(0, 8);
 ---
 
 <ProductCarousel {heading} client:idle>

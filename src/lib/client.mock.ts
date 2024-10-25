@@ -28,22 +28,28 @@ import type {
 	Order,
 	Product,
 } from './client.types.ts';
-import { db, ProductsTable, isNull, eq, and, like, desc, asc, inArray } from 'astro:db';
-
-import collectionsData from '../../data/collections.json';
+import {
+	db,
+	ProductsTable,
+	CollectionsTable,
+	isNull,
+	eq,
+	and,
+	like,
+	desc,
+	asc,
+	inArray,
+} from 'astro:db';
 import { productIdFromVariantId } from './util.ts';
 
 export * from './client.types.ts';
 
-const collections: Record<string, Collection> = collectionsData;
-
 type DbProduct = typeof ProductsTable.$inferSelect;
+type DbCollection = typeof CollectionsTable.$inferSelect;
 
-type getProductsReturnType = RequestResult<GetProductsResponse, GetProductsError, false>;
-
-export const getProducts = async <ThrowOnError extends boolean = false>(
-	options?: Options<GetProductsData, ThrowOnError>,
-): getProductsReturnType => {
+export const getProducts = async (
+	options?: Options<GetProductsData, false>,
+): RequestResult<GetProductsResponse, GetProductsError, false> => {
 	// Base filter - non-deleted products
 	const baseFilter = isNull(ProductsTable.deletedAt);
 	let filter = baseFilter;
@@ -55,8 +61,10 @@ export const getProducts = async <ThrowOnError extends boolean = false>(
 	}
 	if (options?.query?.ids) {
 		const ids = Array.isArray(options.query.ids) ? options.query.ids : [options.query.ids];
-		const condition = inArray(ProductsTable.id, ids);
-		filter = and(filter, condition)!;
+		if (ids.length > 0) {
+			const condition = inArray(ProductsTable.id, ids);
+			filter = and(filter, condition)!;
+		}
 	}
 
 	if (filter === baseFilter)
@@ -79,48 +87,68 @@ export const getProducts = async <ThrowOnError extends boolean = false>(
 		query = query.orderBy(options.query.order === 'asc' ? asc(sortColumn) : desc(sortColumn));
 	}
 
+	console.time('Fetching products from DB');
 	const dbItems: DbProduct[] = await query;
+	console.timeEnd('Fetching products from DB');
+
 	const items = mapDbProducts(dbItems);
 	console.log('Fetched product count:', items.length);
 
-	const result = asResult({ items, next: null });
-	return result;
+	return asResult({ items, next: null });
 };
 
-type getProductByIdReturnType = RequestResult<GetProductByIdResponse, GetProductByIdError, false>;
-
-export const getProductById = async <ThrowOnError extends boolean = false>(
-	options: Options<GetProductByIdData, ThrowOnError>,
-): getProductByIdReturnType => {
+export const getProductById = async (
+	options: Options<GetProductByIdData, false>,
+): RequestResult<GetProductByIdResponse, GetProductByIdError, false> => {
 	const items: DbProduct[] = await db
 		.select()
 		.from(ProductsTable)
 		.where(eq(ProductsTable.id, options.path.id))
 		.limit(1);
+
 	if (items.length === 0) {
 		const error = asError<GetProductByIdError>({ error: 'not-found' });
 		if (options.throwOnError) throw error;
 		return error as RequestResult<GetProductByIdResponse, GetProductByIdError, false>;
 	}
+
 	const product = mapDbProducts(items)[0]!;
 	return asResult(product);
 };
 
-export const getCollections = <ThrowOnError extends boolean = false>(
-	_options?: Options<GetCollectionsData, ThrowOnError>,
-): RequestResult<GetCollectionsResponse, GetCollectionsError, ThrowOnError> => {
-	return asResult({ items: Object.values(collections), next: null });
+export const getCollections = async (
+	options?: Options<GetCollectionsData, false>,
+): RequestResult<GetCollectionsResponse, GetCollectionsError, false> => {
+	let query = db
+		.select()
+		.from(CollectionsTable)
+		.where(isNull(CollectionsTable.deletedAt))
+		.$dynamic();
+	if (options?.query?.limit) query = query.limit(options.query.limit);
+
+	const dbItems: DbCollection[] = await query;
+	const items = mapDbCollections(dbItems);
+	console.log('Fetched collection count:', items.length);
+
+	const result = asResult({ items, next: null });
+	return result;
 };
 
-export const getCollectionById = <ThrowOnError extends boolean = false>(
-	options: Options<GetCollectionByIdData, ThrowOnError>,
-): RequestResult<GetCollectionByIdResponse, GetCollectionByIdError, ThrowOnError> => {
-	const collection = collections[options.path.id];
-	if (!collection) {
+export const getCollectionById = async (
+	options: Options<GetCollectionByIdData, false>,
+): RequestResult<GetCollectionByIdResponse, GetCollectionByIdError, false> => {
+	const items: DbCollection[] = await db
+		.select()
+		.from(CollectionsTable)
+		.where(eq(CollectionsTable.id, options.path.id))
+		.limit(1);
+
+	if (items.length === 0) {
 		const error = asError<GetCollectionByIdError>({ error: 'not-found' });
 		if (options.throwOnError) throw error;
-		return error as RequestResult<GetCollectionByIdResponse, GetCollectionByIdError, ThrowOnError>;
+		return error as RequestResult<GetCollectionByIdResponse, GetCollectionByIdError, false>;
 	}
+	const collection = mapDbCollections(items)[0]!;
 	return asResult({ ...collection, products: [] });
 };
 
@@ -139,11 +167,9 @@ export const createCustomer = <ThrowOnError extends boolean = false>(
 
 const orders: Record<string, Order> = {};
 
-type createOrderReturnType = RequestResult<CreateOrderResponse, CreateOrderError, false>;
-
-export const createOrder = async <ThrowOnError extends boolean = false>(
-	options?: Options<CreateOrderData, ThrowOnError>,
-): createOrderReturnType => {
+export const createOrder = async (
+	options?: Options<CreateOrderData, false>,
+): RequestResult<CreateOrderResponse, CreateOrderError, false> => {
 	if (!options?.body) throw new Error('No body provided');
 
 	const productIds = options.body.lineItems.map((item) =>
@@ -249,17 +275,25 @@ function makeVariants(product: DbProduct) {
 	return apparelVariants;
 }
 
-function mapDbProducts(productsFromSelect: DbProduct[]): Product[] {
-	const result: Product[] = productsFromSelect.map((item) => {
-		return {
-			...item,
-			collectionIds: item.collectionIds as string[],
-			variants: makeVariants(item),
-			createdAt: item.createdAt.toISOString(),
-			updatedAt: item.updatedAt.toISOString(),
-			deletedAt: null,
-			images: [],
-		};
-	});
-	return result;
+function mapDbProducts(selectResponse: DbProduct[]): Product[] {
+	return selectResponse.map((item) => ({
+		...item,
+		collectionIds: item.collectionIds as string[],
+		variants: makeVariants(item),
+		createdAt: item.createdAt.toISOString(),
+		updatedAt: item.updatedAt.toISOString(),
+		deletedAt: null,
+		images: [],
+	}));
+}
+
+function mapDbCollections(selectResponse: DbCollection[]): Collection[] {
+	return selectResponse.map((item) => ({
+		...item,
+		description: item.description!,
+		createdAt: item.createdAt.toISOString(),
+		updatedAt: item.updatedAt.toISOString(),
+		imageUrl: undefined,
+		deletedAt: null,
+	}));
 }

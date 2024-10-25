@@ -1,6 +1,6 @@
 import { type ActionAPIContext, ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { getProducts } from 'storefront:client';
+import { getProductById, getProducts } from 'storefront:client';
 import { loadCartFromCookies, saveCartToCookies } from '~/features/cart/cart.server.ts';
 import {
 	type Cart,
@@ -11,6 +11,7 @@ import {
 	removeItemFromCart,
 	updateCartItemQuantity,
 } from '~/features/cart/cart.ts';
+import { productIdFromVariantId } from '~/lib/util.ts';
 
 export const cart = {
 	get: defineAction({
@@ -19,15 +20,9 @@ export const cart = {
 	addItems: defineAction({
 		input: lineItemDataSchema.omit({ id: true }),
 		handler: async (input, ctx) => {
-			// we should add an endpoint to get product variants by ID,
-			// but for now, we'll just fetch all the products and filter
-			const products = await getProducts({
-				query: {},
-			});
-
-			const product = products.data?.items.find((product) =>
-				product.variants.some((variant) => variant.id === input.productVariantId),
-			);
+			const productId = productIdFromVariantId(input.productVariantId);
+			const productResponse = await getProductById({ path: { id: productId } });
+			const product = productResponse.data;
 
 			if (!product) {
 				throw new ActionError({

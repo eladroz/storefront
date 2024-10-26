@@ -15,6 +15,7 @@ const ProductsTable = defineTable({
 		updatedAt: column.date(),
 		deletedAt: column.date({ optional: true }),
 	},
+	indexes: [{ on: ['price'] }, { on: ['updatedAt'] }],
 });
 
 const CollectionsTable = defineTable({

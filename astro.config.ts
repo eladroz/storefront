@@ -16,7 +16,7 @@ export default defineConfig({
 		solidJs(),
 		db(),
 		sentry({
-			dsn: 'https://0bbb1c7a8fd6f1318dfc69dad2d14b41@o4508189071310848.ingest.us.sentry.io/4508189072949248',
+			dsn: process.env.SENTRY_DSN,
 			sourceMapsUploadOptions: {
 				project: 'javascript-astro',
 				authToken: process.env.SENTRY_AUTH_TOKEN,

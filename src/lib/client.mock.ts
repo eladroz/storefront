@@ -39,6 +39,7 @@ import {
 	desc,
 	asc,
 	inArray,
+	count,
 } from 'astro:db';
 import { productIdFromVariantId } from './util.ts';
 
@@ -46,55 +47,71 @@ export * from './client.types.ts';
 
 type DbProduct = typeof ProductsTable.$inferSelect;
 type DbCollection = typeof CollectionsTable.$inferSelect;
+type DbCount = { count: number };
 
 export const getProducts = async (
 	options?: Options<GetProductsData, false>,
 ): RequestResult<GetProductsResponse, GetProductsError, false> => {
-	// Base filter - non-deleted products
-	const baseFilter = isNull(ProductsTable.deletedAt);
-	let filter = baseFilter;
-
-	// Add optional filter clauses
-	if (options?.query?.collectionId) {
-		const condition = like(ProductsTable.collectionIds, `%"${options.query.collectionId}"%`);
-		filter = and(filter, condition)!;
-	}
-	if (options?.query?.ids) {
-		const ids = Array.isArray(options.query.ids) ? options.query.ids : [options.query.ids];
-		if (ids.length > 0) {
-			const condition = inArray(ProductsTable.id, ids);
-			filter = and(filter, condition)!;
+	function buildQuery(options?: GetProductsData & { count?: boolean }) {
+		let whereClause = isNull(ProductsTable.deletedAt);
+		if (options?.query?.collectionId) {
+			const condition = like(ProductsTable.collectionIds, `%"${options.query.collectionId}"%`);
+			whereClause = and(whereClause, condition)!;
 		}
+		if (options?.query?.ids) {
+			const ids = Array.isArray(options.query.ids) ? options.query.ids : [options.query.ids];
+			if (ids.length > 0) {
+				const condition = inArray(ProductsTable.id, ids);
+				whereClause = and(whereClause, condition)!;
+			}
+		}
+
+		let query = (options?.count ? db.select({ count: count() }) : db.select())
+			.from(ProductsTable)
+			.where(whereClause)
+			.$dynamic(); // Allow further refinement
+
+		if (options?.query?.sort && options?.query?.order) {
+			const colName = options.query.sort;
+			let sortColumn =
+				colName === 'name'
+					? ProductsTable.name
+					: colName === 'price'
+						? ProductsTable.price
+						: ProductsTable.updatedAt;
+			query = query.orderBy(options.query.order === 'asc' ? asc(sortColumn) : desc(sortColumn));
+		}
+
+		if (options?.query?.limit) query = query.limit(options.query.limit);
+		if (options?.query?.offset) query = query.offset(options.query.offset);
+
+		return query;
 	}
 
-	// Build filtered query, but allow further refinement to the builder
-	let query = db.select().from(ProductsTable).where(filter).$dynamic();
-
-	if (options?.query?.limit) query = query.limit(options.query.limit);
-
-	// Optional ordering
-	if (options?.query?.sort && options?.query?.order) {
-		const colName = options.query.sort;
-		let sortColumn =
-			colName === 'name'
-				? ProductsTable.name
-				: colName === 'price'
-					? ProductsTable.price
-					: ProductsTable.updatedAt;
-		query = query.orderBy(options.query.order === 'asc' ? asc(sortColumn) : desc(sortColumn));
-	}
-
-	if (filter === baseFilter && !options?.query?.limit)
-		console.trace('getProducts called without any filters or limit, options:', options);
+	const query = buildQuery(options);
 
 	console.time('Fetching products from DB');
-	const dbItems: DbProduct[] = await query;
+	const dbItems = (await query) as DbProduct[];
+
+	let countResult: number | null = null;
+	if (options?.query?.withCount) {
+		const countQuery = buildQuery({
+			count: true,
+			query: { ...options.query, limit: undefined, offset: undefined },
+		});
+		const dbCount = (await countQuery) as unknown as DbCount[]; // TODO run concurrently with main query
+		if (dbCount.length === 1) {
+			countResult = dbCount[0]?.count ?? null;
+		} else {
+			console.trace('Failed to select count', options);
+		}
+	}
 	console.timeEnd('Fetching products from DB');
 
 	const items = mapDbProducts(dbItems);
 	console.log('Fetched product count:', items.length);
 
-	return asResult({ items, next: null });
+	return asResult({ items, next: null, count: countResult });
 };
 
 export const getProductById = async (

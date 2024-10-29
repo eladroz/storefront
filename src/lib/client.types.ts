@@ -121,6 +121,8 @@ export type GetProductsData = {
 		ids?: Array<string> | string;
 		limit?: number;
 		next?: string;
+		offset?: number;
+		withCount?: boolean;
 		order?: 'asc' | 'desc';
 		/** Search for products by name or description */
 		search?: string;
@@ -130,6 +132,7 @@ export type GetProductsData = {
 
 export type GetProductsResponse = {
 	items: Array<Product>;
+	count: number | null;
 	next: string | null;
 };
 

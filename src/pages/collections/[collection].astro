@@ -2,7 +2,8 @@
 import { getCollectionById, getProducts } from 'storefront:client';
 import { z } from 'zod';
 import CheckboxLink from '~/components/ui/CheckboxLink.astro';
-import { applyCacheHeaders } from '~/config.ts';
+import { PAGE_ITEM_COUNT } from '~/config.ts';
+import { applyCacheHeaders } from '~/lib/headers.ts';
 import ProductCard from '~/features/product/ProductCard.astro';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import SideColumnLayout from '~/layouts/SideColumnLayout.astro';
@@ -13,6 +14,7 @@ const searchParams = Object.fromEntries(Astro.url.searchParams);
 
 const sort = z.enum(['price']).optional().parse(searchParams.sort);
 const order = z.enum(['asc', 'desc']).optional().parse(searchParams.order);
+const pageId = z.number({ coerce: true }).int().positive().default(1).parse(searchParams.pageId);
 
 const collectionId = unwrap(Astro.params.collection, 'Collection param not found');
 const collectionResponse = await getCollectionById({
@@ -24,7 +26,14 @@ if (collectionResponse.error) {
 }
 
 const productsResponse = await getProducts({
-	query: { collectionId, sort, order },
+	query: {
+		collectionId,
+		sort,
+		order,
+		limit: PAGE_ITEM_COUNT,
+		offset: (pageId - 1) * PAGE_ITEM_COUNT,
+		withCount: true,
+	},
 });
 
 if (!productsResponse.data) {
@@ -35,6 +44,9 @@ const collection = collectionResponse.data;
 const products = productsResponse.data.items.filter((product) => {
 	return getProductStock(product) > 0;
 });
+const fullProductCount = productsResponse.data.count!;
+const pageCount = Math.ceil(fullProductCount / PAGE_ITEM_COUNT);
+console.log(`Page for collection ${collectionId}: ${pageCount}`); // TODO add actual pagination
 
 applyCacheHeaders(Astro.response.headers, { cacheTags: { collectionIds: [collectionId] } });
 ---
@@ -48,7 +60,7 @@ applyCacheHeaders(Astro.response.headers, { cacheTags: { collectionIds: [collect
 						{collection.name}
 					</h2>
 					<p class="text-sm font-medium text-slate-600">
-						{products.length} products
+						{fullProductCount} products
 					</p>
 				</header>
 				<nav class="flex flex-col gap-2" aria-labelledby="sort-by-heading">

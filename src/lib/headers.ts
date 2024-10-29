@@ -29,7 +29,8 @@ export function applyCacheHeaders(headers: Headers, options?: { cacheTags?: Cach
 		headers.append(key, value);
 	});
 }
-class CacheTags {
+
+export class CacheTags {
 	static forProduct(productId: string) {
 		return `pid_${productId}`;
 	}
@@ -40,13 +41,22 @@ class CacheTags {
 		return 'collections_metadata';
 	}
 
-	static toHeaderValue(options: CacheTagOptions): string | null {
-		let arr: string[] = [];
-		if (options.productIds) arr = arr.concat(options.productIds.map((id) => this.forProduct(id)));
-		if (options.collectionIds)
-			arr = arr.concat(options.collectionIds.map((id) => this.forCollection(id)));
-		if (options.collectionsMetadata) arr.push(this.forCollectionsMetadata());
+	static toValues(options: CacheTagOptions): string[] {
+		let values: string[] = [];
+		if (options.productIds?.length) {
+			values = values.concat(options.productIds.map((id) => this.forProduct(id)));
+		}
+		if (options.collectionIds?.length) {
+			values = values.concat(options.collectionIds.map((id) => this.forCollection(id)));
+		}
+		if (options.collectionsMetadata) {
+			values.push(this.forCollectionsMetadata());
+		}
+		return values;
+	}
 
-		return arr.length > 0 ? arr.join(',') : null;
+	static toHeaderValue(options: CacheTagOptions): string | null {
+		const values = this.toValues(options);
+		return values.length > 0 ? values.join(',') : null;
 	}
 }

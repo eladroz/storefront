@@ -31,7 +31,15 @@ const CollectionsTable = defineTable({
 	},
 });
 
+const JobsTable = defineTable({
+	columns: {
+		name: column.text({ primaryKey: true }),
+		lastRun: column.date(),
+		lastRunInfo: column.json({ optional: true }),
+	},
+});
+
 // https://astro.build/db/config
 export default defineDb({
-	tables: { ProductsTable, CollectionsTable },
+	tables: { ProductsTable, CollectionsTable, JobsTable },
 });

@@ -2,7 +2,7 @@ import { type Product, getProducts } from 'storefront:client';
 import { getProductStock } from '~/lib/products.ts';
 import { inplaceShuffle } from '~/lib/util.ts';
 
-const defaultItemCount = 8;
+const defaultItemCount = 7;
 const defaultSampleSize = 20;
 
 export async function getRecommendedProducts(options?: {

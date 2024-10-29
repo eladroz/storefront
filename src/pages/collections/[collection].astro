@@ -2,7 +2,7 @@
 import { getCollectionById, getProducts } from 'storefront:client';
 import { z } from 'zod';
 import CheckboxLink from '~/components/ui/CheckboxLink.astro';
-import { applyDefaultCacheHeaders } from '~/config.ts';
+import { applyCacheHeaders } from '~/config.ts';
 import ProductCard from '~/features/product/ProductCard.astro';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import SideColumnLayout from '~/layouts/SideColumnLayout.astro';
@@ -13,8 +13,6 @@ const searchParams = Object.fromEntries(Astro.url.searchParams);
 
 const sort = z.enum(['price']).optional().parse(searchParams.sort);
 const order = z.enum(['asc', 'desc']).optional().parse(searchParams.order);
-
-applyDefaultCacheHeaders(Astro.response.headers);
 
 const collectionId = unwrap(Astro.params.collection, 'Collection param not found');
 const collectionResponse = await getCollectionById({
@@ -37,6 +35,8 @@ const collection = collectionResponse.data;
 const products = productsResponse.data.items.filter((product) => {
 	return getProductStock(product) > 0;
 });
+
+applyCacheHeaders(Astro.response.headers, { cacheTags: { collectionIds: [collectionId] } });
 ---
 
 <PrimaryLayout title={`Astro Shop | ${collection.name}`}>

@@ -5,16 +5,14 @@ import ProductCarouselSection from '~/features/product/ProductCarouselSection.as
 import { ProductDetailDescriptionDialog } from '~/features/product/ProductDetailDescriptionDialog.tsx';
 import { ProductImageCarousel } from '~/features/product/ProductImageCarousel.tsx';
 import { ProductImageSwitcher } from '~/features/product/ProductImageSwitcher.tsx';
-import { applyDefaultCacheHeaders } from '~/config.ts';
+import { applyCacheHeaders } from '~/config.ts';
 import { AddToCartForm } from '~/features/cart/AddToCartForm.tsx';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import { getProductById } from 'storefront:client';
 import { unwrap } from '~/lib/util.ts';
 import { getImage } from 'astro:assets';
 import { ProductPrice } from '~/features/product/ProductPrice.tsx';
-import { getRecommendedProducts } from '~/features/product/carousel.server.ts';
-
-applyDefaultCacheHeaders(Astro.response.headers);
+import { getRecommendedProducts } from '~/lib/recommendations.ts';
 
 const id = unwrap(Astro.params.product, 'Product param not found');
 const productResponse = await getProductById({
@@ -44,6 +42,13 @@ if (!firstImage) throw new Error(`No images found for product ${id}`);
 const recommendedProducts = await getRecommendedProducts({
 	collectionId: product.collectionIds?.[0],
 	excludeIds: [id],
+});
+
+applyCacheHeaders(Astro.response.headers, {
+	cacheTags: {
+		productIds: [id, ...recommendedProducts.map((p) => p.id)],
+		collectionsMetadata: true,
+	},
 });
 ---
 

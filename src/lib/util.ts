@@ -32,3 +32,29 @@ export function productIdFromVariantId(productVariantId: string): string {
 	if (idElements.length !== 2) throw new Error(`Invalid productVariantId: ${productVariantId}`);
 	return idElements[0]!;
 }
+
+export function getPaginationLinks(
+	originalParams: URLSearchParams,
+	options: {
+		paramName: string;
+		currentPage: number;
+		totalPages: number;
+	},
+) {
+	function modifiedParams(value: number) {
+		const params = new URLSearchParams(originalParams.toString());
+		params.set(options.paramName, value.toString());
+		return '?' + params.toString();
+	}
+
+	return {
+		prev:
+			options.totalPages > 1 && options.currentPage > 1
+				? modifiedParams(options.currentPage - 1)
+				: null,
+		next:
+			options.totalPages > 1 && options.currentPage < options.totalPages
+				? modifiedParams(options.currentPage + 1)
+				: null,
+	};
+}

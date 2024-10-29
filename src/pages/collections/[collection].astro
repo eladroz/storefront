@@ -8,13 +8,20 @@ import ProductCard from '~/features/product/ProductCard.astro';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import SideColumnLayout from '~/layouts/SideColumnLayout.astro';
 import { getProductStock } from '~/lib/products.ts';
-import { unwrap } from '~/lib/util.ts';
+import { unwrap, getPaginationLinks } from '~/lib/util.ts';
+
+const PAGE_NUMBER_PARAM = 'page';
 
 const searchParams = Object.fromEntries(Astro.url.searchParams);
 
 const sort = z.enum(['price']).optional().parse(searchParams.sort);
 const order = z.enum(['asc', 'desc']).optional().parse(searchParams.order);
-const pageId = z.number({ coerce: true }).int().positive().default(1).parse(searchParams.pageId);
+const currentPage = z
+	.number({ coerce: true })
+	.int()
+	.positive()
+	.default(1)
+	.parse(searchParams[PAGE_NUMBER_PARAM]);
 
 const collectionId = unwrap(Astro.params.collection, 'Collection param not found');
 const collectionResponse = await getCollectionById({
@@ -31,7 +38,7 @@ const productsResponse = await getProducts({
 		sort,
 		order,
 		limit: PAGE_ITEM_COUNT,
-		offset: (pageId - 1) * PAGE_ITEM_COUNT,
+		offset: (currentPage - 1) * PAGE_ITEM_COUNT,
 		withCount: true,
 	},
 });
@@ -44,9 +51,17 @@ const collection = collectionResponse.data;
 const products = productsResponse.data.items.filter((product) => {
 	return getProductStock(product) > 0;
 });
-const fullProductCount = productsResponse.data.count!;
-const pageCount = Math.ceil(fullProductCount / PAGE_ITEM_COUNT);
-console.log(`Page for collection ${collectionId}: ${pageCount}`); // TODO add actual pagination
+
+const totalProductsInCollection = productsResponse.data.count!;
+const totalPages = Math.ceil(totalProductsInCollection / PAGE_ITEM_COUNT);
+if (totalPages > 1)
+	console.log(`Page ${currentPage} of ${totalPages} for collection: ${collectionId}`);
+
+const paginationLinks = totalPages > 1 ? getPaginationLinks(Astro.url.searchParams, {
+	paramName: PAGE_NUMBER_PARAM,
+	currentPage: currentPage,
+	totalPages: totalPages
+}) : null;
 
 applyCacheHeaders(Astro.response.headers, { cacheTags: { collectionIds: [collectionId] } });
 ---
@@ -60,7 +75,7 @@ applyCacheHeaders(Astro.response.headers, { cacheTags: { collectionIds: [collect
 						{collection.name}
 					</h2>
 					<p class="text-sm font-medium text-slate-600">
-						{fullProductCount} products
+						{totalProductsInCollection} products
 					</p>
 				</header>
 				<nav class="flex flex-col gap-2" aria-labelledby="sort-by-heading">
@@ -76,13 +91,33 @@ applyCacheHeaders(Astro.response.headers, { cacheTags: { collectionIds: [collect
 				</nav>
 			</div>
 
-			<section
-				slot="main"
-				class="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4"
-				aria-labelledby="products-heading"
-				aria-label="Products"
-			>
-				{products.map((product) => <ProductCard {...product} />)}
+			<section slot="main" class="flex flex-col gap-12">
+				<div
+					class="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4"
+					aria-labelledby="products-heading"
+					aria-label="Products"
+				>
+					{products.map((product) => <ProductCard {...product} />)}
+				</div>
+				{ !!paginationLinks && 
+					<div class="flex justify-center gap-4">
+						<span>
+							{
+								paginationLinks.prev ? 
+									(<a href={paginationLinks.prev}}>&lt;</a>)
+									: (<span class="text-theme-base-400">&lt;</span>)	
+							}
+						</span>
+						<span class="border px-2">{currentPage}</span>
+						<span>
+							{
+								paginationLinks.next ? 
+									(<a href={paginationLinks.next}}>&gt;</a>)
+									: (<span class="text-theme-base-400">&gt;</span>)
+							}
+						</span>
+					</div>
+				}
 			</section>
 		</SideColumnLayout>
 	</div>

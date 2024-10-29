@@ -1,3 +1,3 @@
 export const MAX_QUANTITY = 20;
 export const ONE_DAY = 60 * 60 * 24;
-export const PAGE_ITEM_COUNT = 100;
+export const PAGE_ITEM_COUNT = 48;

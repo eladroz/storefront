@@ -12,6 +12,7 @@ import { getProductById } from 'storefront:client';
 import { unwrap } from '~/lib/util.ts';
 import { getImage } from 'astro:assets';
 import { ProductPrice } from '~/features/product/ProductPrice.tsx';
+import { getRecommendedProducts } from '~/features/product/carousel.server.ts';
 
 applyDefaultCacheHeaders(Astro.response.headers);
 
@@ -39,6 +40,11 @@ const productImages = await Promise.all(
 );
 const firstImage = productImages[0];
 if (!firstImage) throw new Error(`No images found for product ${id}`);
+
+const recommendedProducts = await getRecommendedProducts({
+	collectionId: product.collectionIds?.[0],
+	excludeIds: [id],
+});
 ---
 
 <PrimaryLayout title={`Astro Shop | ${product.name}`}>
@@ -107,11 +113,7 @@ if (!firstImage) throw new Error(`No images found for product ${id}`);
 			</div>
 		</div>
 
-		<ProductCarouselSection
-			heading="You might also like"
-			filterProducts={(products) => products.filter(({ id }) => id !== product.id)}
-			collectionId={product.collectionIds?.[0]}
-		/>
+		<ProductCarouselSection heading="You might also like" products={recommendedProducts} />
 
 		<CollectionSection />
 	</main>

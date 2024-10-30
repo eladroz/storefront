@@ -5,7 +5,7 @@ const DISABLE_CDN_CACHE = process.env.DISABLE_CDN_CACHE?.toLowerCase() === 'true
 export type CacheTagOptions = {
 	productIds?: string[];
 	collectionIds?: string[];
-	collectionsMetadata?: boolean;
+	collectionsMetadataWasModified?: boolean;
 };
 
 export function applyCacheHeaders(headers: Headers, options?: { cacheTags?: CacheTagOptions }) {
@@ -49,7 +49,7 @@ export class CacheTags {
 		if (options.collectionIds?.length) {
 			values = values.concat(options.collectionIds.map((id) => this.forCollection(id)));
 		}
-		if (options.collectionsMetadata) {
+		if (options.collectionsMetadataWasModified) {
 			values.push(this.forCollectionsMetadata());
 		}
 		return values;

@@ -34,8 +34,8 @@ const CollectionsTable = defineTable({
 const JobsTable = defineTable({
 	columns: {
 		name: column.text({ primaryKey: true }),
-		lastRun: column.date(),
-		lastRunInfo: column.json({ optional: true }),
+		lastSuccess: column.json({ optional: true }),
+		lastFailure: column.json({ optional: true }),
 	},
 });
 

@@ -47,7 +47,7 @@ const recommendedProducts = await getRecommendedProducts({
 applyCacheHeaders(Astro.response.headers, {
 	cacheTags: {
 		productIds: [id, ...recommendedProducts.map((p) => p.id)],
-		collectionsMetadata: true,
+		collectionsMetadataWasModified: true,
 	},
 });
 ---

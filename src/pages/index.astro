@@ -9,7 +9,10 @@ import { getRecommendedProducts } from '~/lib/recommendations.ts';
 const recommendedProducts = await getRecommendedProducts();
 
 applyCacheHeaders(Astro.response.headers, {
-	cacheTags: { collectionsMetadata: true, productIds: recommendedProducts.map((p) => p.id) },
+	cacheTags: {
+		collectionsMetadataWasModified: true,
+		productIds: recommendedProducts.map((p) => p.id),
+	},
 });
 ---
 

@@ -2,6 +2,7 @@
 import { CartDrawer } from '~/features/cart/CartDrawer.tsx';
 import AstroLogo from './AstroLogo.astro';
 import type { HTMLAttributes } from 'astro/types';
+import { LoginStatus } from './LoginStatus.tsx';
 
 export interface Props extends HTMLAttributes<'nav'> {}
 
@@ -10,7 +11,10 @@ const { class: className, ...props } = Astro.props;
 
 <nav
 	aria-label="Site navigation"
-	class:list={['!flex min-h-20 flex-row items-center bg-white py-2 md:justify-between', className]}
+	class:list={[
+		'!flex min-h-20 flex-row items-center gap-3 bg-white py-2 md:justify-between',
+		className,
+	]}
 	{...props}
 >
 	<div class="flex-1">
@@ -19,7 +23,8 @@ const { class: className, ...props } = Astro.props;
 			<span class="sr-only">Home</span>
 		</a>
 	</div>
-	<div class="flex flex-1 justify-end gap-2">
+	<LoginStatus client:only="solid-js" />
+	<div class="flex justify-end gap-2">
 		<CartDrawer client:idle />
 	</div>
 </nav>

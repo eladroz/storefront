@@ -8,7 +8,9 @@ const result = Astro.getActionResult(actions.auth.login);
 ---
 
 <PrimaryLayout title="Login">
-	<main class="align-center mx-auto mt-8 flex w-full max-w-[1200px] justify-center gap-8">
+	<main
+		class="align-center mx-auto mt-8 flex w-full max-w-[1200px] justify-center gap-8 md:min-h-72"
+	>
 		<div class="flex h-full w-72 flex-col gap-6">
 			{
 				sessionExists && (

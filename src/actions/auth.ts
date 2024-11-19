@@ -5,6 +5,7 @@ import {
 	authConfigError,
 	clearSession,
 	createVerifiedSession,
+	verifySession,
 } from '~/features/cart/auth.server.ts';
 
 export const auth = {
@@ -14,11 +15,9 @@ export const auth = {
 			password: z.string(),
 		}),
 		handler: async ({ password }, ctx) => {
-			console.log('*** logIN!');
-
 			let configError = authConfigError();
 			if (configError) {
-				console.error(configError);
+				console.error('ERROR:', configError);
 				throw new ActionError({ code: 'INTERNAL_SERVER_ERROR' });
 			}
 
@@ -35,8 +34,12 @@ export const auth = {
 		accept: 'form',
 		input: z.object({}),
 		handler: async (_, ctx) => {
-			console.log('*** logout!');
 			clearSession(ctx.cookies);
+		},
+	}),
+	isLoggedIn: defineAction({
+		handler: (_, ctx) => {
+			return { isLoggedIn: verifySession(ctx.cookies) };
 		},
 	}),
 };

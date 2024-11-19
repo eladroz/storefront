@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET, BASIC_PASSWORD } from 'astro:env/server';
 
 const SESSION_COOKIE_NAME = 'session';
-const JWT_SECRET_MIN_LENGTH = 16;
-const PASSWORD_MIN_LENGTH = 6;
+const JWT_SECRET_MIN_LENGTH = 32;
+const PASSWORD_MIN_LENGTH = 8;
 
 type TokenPayload =
 	| undefined

@@ -2,8 +2,6 @@ import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import { getProducts, type Product } from 'storefront:client';
 
-//export const prerender = false;
-
 const MAX_RESULTS = 25;
 
 type SearchResponse = {

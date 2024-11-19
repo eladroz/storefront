@@ -12,7 +12,7 @@ import { CgPokemon } from 'solid-icons/cg';
 // serving original images, if running in dev without Netlify CLI (netlify dev)
 const imageCDN = undefined; //'netlify';
 
-export function SearchSection() {
+export function SearchSection(props: { withMutations?: boolean }) {
 	const [queryText, setQueryText] = createSignal('');
 
 	const searchQuery = createQuery(
@@ -37,26 +37,32 @@ export function SearchSection() {
 			/>
 			<div>Results:</div>
 			{searchQuery.data.items.map((p) => {
-				return <ResultCard product={p} />;
+				return <ResultCard product={p} withMutations={props.withMutations} />;
 			})}
 		</div>
 	);
 }
 
-function ResultCard(props: { product: Product }) {
+function ResultCard(props: { product: Product; withMutations?: boolean }) {
 	const p = props.product;
 
-	const addPokemonSuffixMutation = createMutation(
-		() => ({
-			mutationKey: ['product', 'addPokemonSuffix', p.id],
-			mutationFn: async () => {
-				await actions.product.addPokemonSuffix.orThrow({
-					id: p.id,
-				});
-			},
-		}),
-		() => queryClient,
-	);
+	const withMutations = () => {
+		return !!props.withMutations;
+	};
+
+	const addPokemonSuffixMutation = withMutations()
+		? createMutation(
+				() => ({
+					mutationKey: ['product', 'addPokemonSuffix', p.id],
+					mutationFn: async () => {
+						await actions.product.addPokemonSuffix.orThrow({
+							id: p.id,
+						});
+					},
+				}),
+				() => queryClient,
+			)
+		: undefined;
 
 	return (
 		<div class="flex items-center gap-2 border p-2 pr-4">
@@ -65,14 +71,16 @@ function ResultCard(props: { product: Product }) {
 				<h3 class="text-pretty font-medium leading-tight text-theme-base-900">{p.name}</h3>
 				<div class="max-w-screen-md text-sm	">{p.description}</div>
 			</div>
-			<Button
-				onClick={() => {
-					addPokemonSuffixMutation.mutate();
-				}}
-			>
-				<CgPokemon size={24} />
-				Add Pokemon
-			</Button>
+			{!!addPokemonSuffixMutation && (
+				<Button
+					onClick={() => {
+						addPokemonSuffixMutation.mutate();
+					}}
+				>
+					<CgPokemon size={24} />
+					Add Pokemon
+				</Button>
+			)}
 		</div>
 	);
 }

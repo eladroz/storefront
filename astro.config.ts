@@ -31,6 +31,16 @@ export default defineConfig({
 	experimental: {
 		env: {
 			schema: {
+				BASIC_PASSWORD: envField.string({
+					context: 'server',
+					access: 'secret',
+					optional: true,
+				}),
+				JWT_SECRET: envField.string({
+					context: 'server',
+					access: 'secret',
+					optional: true,
+				}),
 				STRIPE_SECRET_KEY: envField.string({
 					context: 'server',
 					access: 'secret',
@@ -72,24 +82,17 @@ export default defineConfig({
 					access: 'public',
 					optional: true,
 				}),
-				// Used by the Astro team for our internal backend
-				SHOP_API_URL: envField.string({
-					context: 'server',
-					access: 'public',
-					optional: true,
-				}),
-				SHOP_API_KEY: envField.string({
-					context: 'server',
-					access: 'secret',
-					optional: true,
-				}),
 				US_SHIPPING_RATE_ID: envField.string({
 					context: 'server',
 					access: 'secret',
+					// This is a random ID
+					default: 'mw5TYW8Dnlh56TRWKan',
 				}),
 				INTERNATIONAL_SHIPPING_RATE_ID: envField.string({
 					context: 'server',
 					access: 'secret',
+					// This is a random test key
+					default: 'miH7VKjht1sYabCgaY1',
 				}),
 			},
 		},

@@ -1,7 +1,9 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute, APIContext } from 'astro';
+import { verifySession } from '~/features/cart/auth.server.ts';
 import { revalidateJob } from '~/lib/jobs/revalidate.ts';
 
-// TODO only run if secret token is passed, create wrapper function/class to reuse code
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async (context: APIContext) => {
+	if (!verifySession(context.cookies)) return new Response('Not authorized', { status: 403 });
+
 	return await revalidateJob();
 };

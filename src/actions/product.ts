@@ -1,6 +1,7 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import { getProductById, updateProductName } from 'storefront:client';
+import { verifySession } from '~/features/cart/auth.server.ts';
 import { addPokemonSuffix } from '~/lib/pokemons.ts';
 
 export const product = {
@@ -8,7 +9,9 @@ export const product = {
 		input: z.object({
 			id: z.string(),
 		}),
-		handler: async (input) => {
+		handler: async (input, ctx) => {
+			if (!verifySession(ctx.cookies)) throw new ActionError({ code: 'UNAUTHORIZED' });
+
 			const { id } = input;
 			const originalProduct = (await getProductById({ path: { id } })).data;
 			if (originalProduct) {

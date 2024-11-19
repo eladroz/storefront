@@ -1,10 +1,13 @@
 ---
+import { verifySession } from '~/features/cart/auth.server.ts';
 import { SearchSection } from '~/features/search/SearchSection';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
+
+const sessionExists = verifySession(Astro.cookies);
 ---
 
 <PrimaryLayout title={`Update a product`}>
 	<main class="mx-auto mt-8 w-full max-w-[1200px] gap-8">
-		<SearchSection client:idle />
+		<SearchSection withMutations={sessionExists} client:idle />
 	</main>
 </PrimaryLayout>

@@ -1,0 +1,41 @@
+---
+import { actions } from 'astro:actions';
+import { verifySession } from '~/features/cart/auth.server.ts';
+import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
+
+const sessionExists = verifySession(Astro.cookies);
+const result = Astro.getActionResult(actions.auth.login);
+---
+
+<PrimaryLayout title="Login">
+	<main class="align-center mx-auto mt-8 flex w-full max-w-[1200px] justify-center gap-8">
+		<div class="flex h-full w-72 flex-col gap-6">
+			{
+				sessionExists && (
+					<form method="POST" action={actions.auth.logout}>
+						<span>You are already logged in.</span>
+						<button type="submit" class="font-bold">
+							Log out
+						</button>
+					</form>
+				)
+			}
+			<form method="POST" action={'/' + actions.auth.login} class="flex flex-col gap-3">
+				<input
+					type="password"
+					name="password"
+					required
+					placeholder="Enter password..."
+					class="w-full border bg-transparent bg-white p-2 ring-inset ring-transparent"
+				/>
+				<button
+					type="submit"
+					class="h-11 w-full bg-theme-base-900 px-4 text-sm font-semibold uppercase text-white transition"
+				>
+					Login
+				</button>
+				{result?.error && <p class="error">Invalid credentials</p>}
+			</form>
+		</div>
+	</main>
+</PrimaryLayout>

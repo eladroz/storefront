@@ -10,7 +10,7 @@ const { class: className, ...props } = Astro.props;
 
 <nav
 	aria-label="Site navigation"
-	class:list={["min-h-20 !flex items-center flex-row md:justify-between py-2 bg-white", className]}
+	class:list={['!flex min-h-20 flex-row items-center bg-white py-2 md:justify-between', className]}
 	{...props}
 >
 	<div class="flex-1">

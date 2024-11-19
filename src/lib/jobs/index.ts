@@ -64,3 +64,13 @@ export async function saveJobStatus(
 		await db.update(JobsTable).set(values).where(eq(JobsTable.name, jobName));
 	}
 }
+
+export function makeResponse(options: { error?: boolean; message: string; data?: object }) {
+	const o = {
+		success: !options.error,
+		message: options.message,
+		...options.data,
+	};
+	console.log('Job response:', o);
+	return new Response(JSON.stringify(o), { status: options.error ? 500 : 200 });
+}

@@ -1,21 +1,11 @@
-import type { APIRoute } from 'astro';
 import { CollectionsTable, db, gt, or, ProductsTable } from 'astro:db';
 import { CacheTags } from '~/lib/headers.ts';
 import { purgeCache } from '@netlify/functions';
 import { REVALIDATE_JOB } from '~/config.ts';
-import { getJobStatus, saveJobStatus } from '../../../lib/jobs.ts';
+import { getJobStatus, saveJobStatus, makeResponse } from './index.ts';
 
 const SITE_ID = process.env.SITE_ID;
 const MAX_TAGS_TO_PURGE = 100;
-
-function makeResponse(options: { error?: boolean; message: string; data?: object }) {
-	const o = {
-		success: !options.error,
-		message: options.message,
-		...options.data,
-	};
-	return new Response(JSON.stringify(o), { status: options.error ? 500 : 200 });
-}
 
 async function getModifiedTags(sinceDate: Date) {
 	const modifiedCollections = await db
@@ -64,8 +54,8 @@ async function getModifiedTags(sinceDate: Date) {
 	});
 }
 
-// TODO only run if secret token is passed, create wrapper function/class to reuse code
-export const GET: APIRoute = async () => {
+// TOOD pull all common job logic out, specific jobs should be template classes
+export const revalidateJob = async () => {
 	const now = new Date();
 	try {
 		const lastJobStatus = await getJobStatus(REVALIDATE_JOB);
@@ -83,7 +73,7 @@ export const GET: APIRoute = async () => {
 		const tags = await getModifiedTags(lastJobStatus.lastSuccess.date);
 		const messages: string[] = [];
 		if (tags.length > 0) {
-			messages.push('Founed updates');
+			messages.push('Found updates');
 			if (SITE_ID) {
 				if (tags.length > MAX_TAGS_TO_PURGE) {
 					messages.push(`Too many tags (${tags.length}), so purging whole site`);

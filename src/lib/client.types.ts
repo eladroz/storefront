@@ -151,6 +151,19 @@ export type GetProductByIdError = {
 	error: string;
 };
 
+export type UpdateProductNameData = {
+	id: string;
+	name: string;
+};
+
+export type UpdateProductNameResponse = {
+	updatedName: string;
+};
+
+export type UpdateProductNameError = {
+	error: string;
+};
+
 export type GetCollectionsData = {
 	query?: {
 		limit?: number;

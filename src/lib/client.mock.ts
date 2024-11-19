@@ -25,6 +25,9 @@ import type {
 	GetProductsData,
 	GetProductsError,
 	GetProductsResponse,
+	UpdateProductNameData,
+	UpdateProductNameError,
+	UpdateProductNameResponse,
 	Order,
 	Product,
 } from './client.types.ts';
@@ -40,8 +43,11 @@ import {
 	asc,
 	inArray,
 	count,
+	sql,
+	or,
 } from 'astro:db';
 import { productIdFromVariantId } from './util.ts';
+import { revalidateJob } from './jobs/revalidate.ts';
 
 export * from './client.types.ts';
 
@@ -64,6 +70,16 @@ export const getProducts = async (
 				const condition = inArray(ProductsTable.id, ids);
 				whereClause = and(whereClause, condition)!;
 			}
+		}
+		if (options?.query?.search) {
+			const search = '%' + options.query.search.toLowerCase() + '%';
+			whereClause = and(
+				whereClause,
+				or(
+					sql`lower(${ProductsTable.name}) like ${search}`,
+					sql`lower(${ProductsTable.description}) like ${search}`,
+				),
+			)!;
 		}
 
 		let query = (options?.count ? db.select({ count: count() }) : db.select())
@@ -131,6 +147,26 @@ export const getProductById = async (
 
 	const product = mapDbProducts(items)[0]!;
 	return asResult(product);
+};
+
+export const updateProductName = async (
+	options: Options<UpdateProductNameData, false>,
+): RequestResult<UpdateProductNameResponse, UpdateProductNameError, false> => {
+	const baseUpdate = { updatedAt: new Date() };
+	const items = await db
+		.update(ProductsTable)
+		.set({ name: options.name, ...baseUpdate })
+		.where(eq(ProductsTable.id, options.id))
+		.returning({ id: ProductsTable.id });
+
+	if (items.length === 0) {
+		const error = asError<UpdateProductNameError>({ error: 'not-found' });
+		if (options.throwOnError) throw error;
+		return error as RequestResult<UpdateProductNameResponse, UpdateProductNameError, false>;
+	}
+
+	await revalidateJob(); // TODO trigger as a background event (can use async workloads and such)
+	return asResult({ updatedName: options.name });
 };
 
 export const getCollections = async (

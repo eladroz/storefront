@@ -1,0 +1,10 @@
+---
+import { SearchSection } from '~/features/search/SearchSection';
+import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
+---
+
+<PrimaryLayout title={`Update a product`}>
+	<main class="mx-auto mt-8 w-full max-w-[1200px] gap-8">
+		<SearchSection client:idle />
+	</main>
+</PrimaryLayout>

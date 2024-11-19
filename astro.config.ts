@@ -3,26 +3,11 @@ import solidJs from '@astrojs/solid-js';
 import tailwind from '@astrojs/tailwind';
 import icon from 'astro-icon';
 import { defineConfig, envField } from 'astro/config';
-
 import db from '@astrojs/db';
-
-import sentry from '@sentry/astro';
 
 // https://astro.build/config
 export default defineConfig({
-	integrations: [
-		tailwind({ applyBaseStyles: false }),
-		icon(),
-		solidJs(),
-		db(),
-		sentry({
-			dsn: process.env.SENTRY_DSN,
-			sourceMapsUploadOptions: {
-				project: 'javascript-astro',
-				authToken: process.env.SENTRY_AUTH_TOKEN,
-			},
-		}),
-	],
+	integrations: [tailwind({ applyBaseStyles: false }), icon(), solidJs(), db()],
 	// Update to your storefront URL
 	site: 'https://shop.astro.build',
 	output: 'server',

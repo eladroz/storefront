@@ -3,7 +3,7 @@ import { getCollectionById, getProducts } from 'storefront:client';
 import { z } from 'zod';
 import CheckboxLink from '~/components/ui/CheckboxLink.astro';
 import { PAGE_ITEM_COUNT } from '~/config.ts';
-import { applyCacheHeaders } from '~/lib/headers.ts';
+import { applyCacheHeaders, CacheTags } from '~/lib/headers.ts';
 import ProductCard from '~/features/product/ProductCard.astro';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import SideColumnLayout from '~/layouts/SideColumnLayout.astro';
@@ -63,13 +63,12 @@ const paginationLinks = totalPages > 1 ? getPaginationLinks(Astro.url.searchPara
 	totalPages: totalPages
 }) : null;
 
-applyCacheHeaders(
-	Astro.response.headers, 
-	{ cacheTags: { collectionIds: [collectionId] }, pathname: Astro.url.pathname, }
-);
+const cacheTags = { collectionIds: [collectionId] };
+const additionalInfoTags = CacheTags.toValues(cacheTags);
+applyCacheHeaders(Astro.response.headers, { cacheTags });
 ---
 
-<PrimaryLayout title={`Astro Shop | ${collection.name}`}>
+<PrimaryLayout title={`Astro Shop | ${collection.name}`} additionalInfoTags={additionalInfoTags}>
 	<div class="pt-4">
 		<SideColumnLayout class="flex flex-wrap gap-4">
 			<div slot="aside" class="flex flex-col gap-4 py-4">

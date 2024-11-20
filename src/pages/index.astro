@@ -2,22 +2,21 @@
 import CollectionSection from '~/features/collection/CollectionSection.astro';
 import LandingHero from '~/components/LandingHero.astro';
 import ProductCarouselSection from '~/features/product/ProductCarouselSection.astro';
-import { applyCacheHeaders } from '~/lib/headers.ts';
+import { applyCacheHeaders, CacheTags, type CacheTagOptions } from '~/lib/headers.ts';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import { getRecommendedProducts } from '~/lib/recommendations.ts';
 
 const recommendedProducts = await getRecommendedProducts();
 
-applyCacheHeaders(Astro.response.headers, {
-	cacheTags: {
-		collectionsMetadataWasModified: true,
-		productIds: recommendedProducts.map((p) => p.id),
-	},
-	pathname: Astro.url.pathname,
-});
+const cacheTags: CacheTagOptions = {
+	collectionsMetadataWasModified: true,
+	productIds: recommendedProducts.map((p) => p.id),
+};
+const additionalInfoTags = CacheTags.toValues(cacheTags);
+applyCacheHeaders(Astro.response.headers, { cacheTags });
 ---
 
-<PrimaryLayout title="Astro Shop">
+<PrimaryLayout title="Astro Shop" additionalInfoTags={additionalInfoTags}>
 	<LandingHero />
 	<main class="breakout mt-16 flex flex-col gap-y-16">
 		<div class="content">

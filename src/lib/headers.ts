@@ -8,10 +8,7 @@ export type CacheTagOptions = {
 	collectionsMetadataWasModified?: boolean;
 };
 
-export function applyCacheHeaders(
-	headers: Headers,
-	options?: { cacheTags?: CacheTagOptions; pathname?: string },
-) {
+export function applyCacheHeaders(headers: Headers, options?: { cacheTags?: CacheTagOptions }) {
 	const cacheHeaders: Record<string, string> = {
 		'cache-control': 'public,max-age=0,must-revalidate',
 	};
@@ -24,10 +21,6 @@ export function applyCacheHeaders(
 			const tagsHeaderValue = CacheTags.toHeaderValue(options.cacheTags);
 			if (tagsHeaderValue) {
 				cacheHeaders['cache-tag'] = tagsHeaderValue;
-				console.log(
-					`Page ${options?.pathname || '?'} generated with cache tags for:`,
-					options?.cacheTags,
-				);
 			}
 		}
 	}

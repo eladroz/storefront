@@ -2,10 +2,14 @@
 import { Icon } from 'astro-icon/components';
 import ExternalLink from '~/components/ui/ExternalLink.astro';
 import SocialIconLink from './SocialIconLink.astro';
+import { simpleDateNow } from '~/lib/util.ts';
 
 export interface Props {
 	class?: string;
+	additionalInfoTags?: string[];
 }
+
+const buildDate = simpleDateNow();
 ---
 
 <footer class={Astro.props.class}>
@@ -70,10 +74,34 @@ export interface Props {
 
 	<section class="flex flex-wrap justify-between gap-y-2 py-6 text-sm text-theme-base-600">
 		<p>
-			{'© 2024 | '}
-			<ExternalLink href="https://astro.build/" target="_blank" rel="noopener noreferrer">
-				{'Astro'}
-			</ExternalLink><span>{' | All Rights Reserved.'}</span>
+			{'Based on '}
+			<ExternalLink
+				href="https://github.com/withastro/storefront"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{'Astro Storefront'}
+			</ExternalLink><span>{` | Page built at: ${buildDate}`}</span>
+			{
+				Astro.props.additionalInfoTags && (
+					<span>
+						{` | `}
+						<span class="has-tooltip underline">
+							<span class="tooltip -mt-72 max-w-lg rounded bg-gray-950 p-2 text-[0.85em] text-gray-300">
+								<span class="flex flex-col gap-1.5">
+									{Astro.props.additionalInfoTags.map((tagValue) => {
+										return (
+											<span class="w-min text-nowrap rounded border px-1 py-0.5">{tagValue}</span>
+										);
+									})}
+								</span>
+							</span>
+							Hover for more information
+						</span>
+					</span>
+				)
+			}
+
 			<p class="flex flex-wrap gap-x-4">
 				<ExternalLink href="https://astro.build/privacy/" target="_blank" rel="noopener noreferrer">
 					Privacy Policy

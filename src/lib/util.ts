@@ -58,3 +58,10 @@ export function getPaginationLinks(
 				: null,
 	};
 }
+
+export function simpleDateNow() {
+	return new Date()
+		.toISOString()
+		.replace('T', ' ')
+		.replace(/\.\d+Z/, ' UTC');
+}

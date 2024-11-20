@@ -26,6 +26,7 @@
 }
 
 @layer components {
+
 	/*
 		A responsive holy grail layout with various layers!
 
@@ -53,47 +54,45 @@
 		</main>
 	*/
 	.content-grid,
-	.content-grid > .breakout {
+	.content-grid>.breakout {
 		& {
 			--content-width: theme('screens.2xl');
 			--side-padding: theme('space.4');
 			display: grid;
 			grid-auto-flow: row;
 			grid-template-columns:
-				[breakout-start]
-				minmax(var(--side-padding), 1fr)
-				[content-start content-left-start]
-				calc(min(100% / 3 - var(--side-padding), var(--content-width) / 3))
-				[content-left-end content-center-start]
-				calc(min(100% / 3 - var(--side-padding), var(--content-width) / 3))
-				[content-center-end content-right-start]
-				calc(min(100% / 3 - var(--side-padding), var(--content-width) / 3))
-				[content-right-end content-end]
-				minmax(var(--side-padding), 1fr)
-				[breakout-end];
+				[breakout-start] minmax(var(--side-padding), 1fr) [content-start content-left-start] calc(min(100% / 3 - var(--side-padding), var(--content-width) / 3)) [content-left-end content-center-start] calc(min(100% / 3 - var(--side-padding), var(--content-width) / 3)) [content-center-end content-right-start] calc(min(100% / 3 - var(--side-padding), var(--content-width) / 3)) [content-right-end content-end] minmax(var(--side-padding), 1fr) [breakout-end];
 			grid-template-rows: repeat(4, min-content);
 		}
 
-		& > * {
+		&>* {
 			grid-column: content;
 		}
 
-		& > .breakout {
+		&>.breakout {
 			grid-column: breakout;
 		}
 
-		& > .content-left {
+		&>.content-left {
 			grid-column: content-left;
 		}
 
-		& > .content-center {
+		&>.content-center {
 			grid-column: content-center;
 			justify-self: center;
 		}
 
-		& > .content-right {
+		&>.content-right {
 			grid-column: content-right;
 			justify-self: end;
 		}
+	}
+
+	.tooltip {
+		@apply invisible absolute;
+	}
+
+	.has-tooltip:hover .tooltip {
+		@apply visible z-50;
 	}
 }

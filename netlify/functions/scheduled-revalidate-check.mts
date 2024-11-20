@@ -7,9 +7,9 @@ The revalidate job would only purge tags for specific entities (e.g. products, c
 which were modified (create/update/mark deleted) in the DB since the last run - if any.
 */
 export default async (req: Request) => {
-	const host = process.env.DEPLOY_URL;
+	const host = process.env.DEPLOY_URL || process.env.URL;
 	if (!host) {
-		console.log('No DEPLOY_URL set, exiting.');
+		console.log('No DEPLOY_URL/URL set, exiting.');
 	}
 
 	// Create a short-lived token for the API call, based on the shared secret

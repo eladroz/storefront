@@ -68,7 +68,9 @@ function ResultCard(props: { product: Product; withMutations?: boolean }) {
 		<div class="flex items-center gap-2 border p-2 pr-4">
 			<Image src={p.imageUrl} width={90} height={90} alt={p.name} cdn={imageCDN} />
 			<div class="flex flex-grow flex-col gap-2">
-				<h3 class="text-pretty font-medium leading-tight text-theme-base-900">{p.name}</h3>
+				<a href={`/products/${p.slug}`}>
+					<h3 class="text-pretty font-medium leading-tight text-theme-base-900">{p.name}</h3>
+				</a>
 				<div class="max-w-screen-md text-sm	">{p.description}</div>
 			</div>
 			{!!addPokemonSuffixMutation && (

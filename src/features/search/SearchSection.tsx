@@ -73,6 +73,7 @@ function ResultCard(props: { product: Product; withMutations?: boolean }) {
 			</div>
 			{!!addPokemonSuffixMutation && (
 				<Button
+					pending={addPokemonSuffixMutation.isPending}
 					onClick={() => {
 						addPokemonSuffixMutation.mutate();
 					}}

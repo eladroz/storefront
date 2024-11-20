@@ -22,6 +22,7 @@ export function SearchBox(
 			class="flex"
 			onSubmit={(event) => {
 				event.preventDefault();
+				console.log('search onSubmit');
 				if (props.onSearch) {
 					props.onSearch(fields.search);
 				}
@@ -37,7 +38,7 @@ export function SearchBox(
 					onInput={(e) => setFields({ search: e.target.value })}
 				/>
 				<button
-					type="button"
+					type="submit"
 					class="flex aspect-square h-full items-center justify-center transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:text-slate-400"
 				>
 					<RiSystemSearchLine />

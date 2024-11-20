@@ -28,14 +28,3 @@ const { class: className, ...props } = Astro.props;
 		<CartDrawer client:idle />
 	</div>
 </nav>
-
-<script>
-	function focusSearch() {
-		const searchInput = document.getElementById('global-search');
-		if (window.location.pathname.startsWith('/search')) {
-			searchInput!.focus();
-		}
-	}
-	document.addEventListener('astro:page-load', focusSearch);
-	document.addEventListener('astro:after-swap', focusSearch);
-</script>

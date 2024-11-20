@@ -16,9 +16,9 @@ export function LoginStatus() {
 	return (
 		<Show when={searchQuery.data}>
 			{searchQuery?.data?.isLoggedIn ? (
-				<div>
+				<a href="/login">
 					<RiSystemShieldStarFill size="20" />
-				</div>
+				</a>
 			) : (
 				<a href="/login">
 					<RiSystemLoginCircleLine size="20" />

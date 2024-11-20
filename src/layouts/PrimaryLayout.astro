@@ -50,7 +50,7 @@ const { title } = Astro.props;
 		<SiteHeader />
 		<div class={`breakout border-b w-full border-theme-base-300`}></div>
 		<slot />
-		<div class="pt-48">
+		<div class="flex flex-col justify-end pt-48">
 			<SiteFooter />
 		</div>
 		{import.meta.env.DEV && <SolidQueryDevtools client:idle />}

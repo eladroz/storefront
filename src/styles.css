@@ -71,6 +71,7 @@
 				[content-right-end content-end]
 				minmax(var(--side-padding), 1fr)
 				[breakout-end];
+			grid-template-rows: repeat(4, min-content);
 		}
 
 		& > * {

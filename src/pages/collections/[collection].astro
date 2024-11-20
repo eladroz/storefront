@@ -63,7 +63,10 @@ const paginationLinks = totalPages > 1 ? getPaginationLinks(Astro.url.searchPara
 	totalPages: totalPages
 }) : null;
 
-applyCacheHeaders(Astro.response.headers, { cacheTags: { collectionIds: [collectionId] } });
+applyCacheHeaders(
+	Astro.response.headers, 
+	{ cacheTags: { collectionIds: [collectionId] }, pathname: Astro.url.pathname, }
+);
 ---
 
 <PrimaryLayout title={`Astro Shop | ${collection.name}`}>

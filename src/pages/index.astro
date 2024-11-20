@@ -13,6 +13,7 @@ applyCacheHeaders(Astro.response.headers, {
 		collectionsMetadataWasModified: true,
 		productIds: recommendedProducts.map((p) => p.id),
 	},
+	pathname: Astro.url.pathname,
 });
 ---
 

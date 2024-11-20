@@ -46,3 +46,11 @@ export function SearchBox(
 		</form>
 	);
 }
+
+export function SearchIconLink() {
+	return (
+		<a href="/search">
+			<RiSystemSearchLine />
+		</a>
+	);
+}

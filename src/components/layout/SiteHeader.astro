@@ -3,6 +3,7 @@ import { CartDrawer } from '~/features/cart/CartDrawer.tsx';
 import AstroLogo from './AstroLogo.astro';
 import type { HTMLAttributes } from 'astro/types';
 import { LoginStatus } from './LoginStatus.tsx';
+import { SearchIconLink } from '~/features/search/SearchBox.tsx';
 
 export interface Props extends HTMLAttributes<'nav'> {}
 
@@ -24,6 +25,7 @@ const { class: className, ...props } = Astro.props;
 		</a>
 	</div>
 	<LoginStatus client:only="solid-js" />
+	<SearchIconLink client:idle />
 	<div class="flex justify-end gap-2">
 		<CartDrawer client:idle />
 	</div>

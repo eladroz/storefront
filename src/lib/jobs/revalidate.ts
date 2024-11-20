@@ -2,7 +2,7 @@ import { CollectionsTable, db, gt, or, ProductsTable } from 'astro:db';
 import { CacheTags } from '~/lib/headers.ts';
 import { purgeCache } from '@netlify/functions';
 import { REVALIDATE_JOB } from '~/config.ts';
-import { getJobStatus, saveJobStatus, makeResponse } from './index.ts';
+import { getJobStatus, saveJobStatus, makeResponse, type JobTrigger } from './index.ts';
 
 const SITE_ID = import.meta.env.SITE_ID;
 const MAX_TAGS_TO_PURGE = 100;
@@ -55,8 +55,9 @@ async function getModifiedTags(sinceDate: Date) {
 }
 
 // TOOD pull all common job logic out, specific jobs should be template classes
-export const revalidateJob = async () => {
+export const revalidateJob = async (options?: { trigger: JobTrigger }) => {
 	const now = new Date();
+	const trigger = options?.trigger;
 	try {
 		const lastJobStatus = await getJobStatus(REVALIDATE_JOB);
 
@@ -66,6 +67,7 @@ export const revalidateJob = async () => {
 				date: now,
 				info: { message },
 				isFirstRun: true,
+				trigger,
 			});
 			return makeResponse({ message });
 		}
@@ -89,12 +91,12 @@ export const revalidateJob = async () => {
 		}
 
 		const message = messages.join('. ');
-		await saveJobStatus(REVALIDATE_JOB, { date: now, info: { message, tags } });
+		await saveJobStatus(REVALIDATE_JOB, { date: now, info: { message, tags }, trigger });
 		return makeResponse({ message, data: { tags } });
 	} catch (e) {
 		let message = e instanceof Error ? e.message : 'unknown error';
 		try {
-			await saveJobStatus(REVALIDATE_JOB, { error: true, date: now, info: { message } });
+			await saveJobStatus(REVALIDATE_JOB, { error: true, date: now, info: { message }, trigger });
 		} catch (e) {
 			message += '. Failed to store failure back to DB.';
 		}

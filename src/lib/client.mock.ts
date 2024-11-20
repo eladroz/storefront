@@ -165,7 +165,7 @@ export const updateProductName = async (
 		return error as RequestResult<UpdateProductNameResponse, UpdateProductNameError, false>;
 	}
 
-	await revalidateJob(); // TODO trigger as a background event (can use async workloads and such)
+	await revalidateJob({ trigger: 'user' }); // TODO trigger as a background event (can use async workloads and such)
 	return asResult({ updatedName: options.name });
 };
 

@@ -1,13 +1,16 @@
 import { JobsTable, db, eq } from 'astro:db';
 
+export type JobTrigger = 'api' | 'user' | 'scheduled';
 type DbJobResult = {
 	date: string;
 	info: object;
+	trigger?: JobTrigger;
 };
 type DbJob = typeof JobsTable.$inferSelect;
 type JobResult = {
 	date: Date;
 	info: object;
+	trigger?: JobTrigger;
 };
 type Job = {
 	name: string;
@@ -48,10 +51,12 @@ export async function saveJobStatus(
 		date: Date;
 		info: object;
 		isFirstRun?: boolean;
+		trigger?: JobTrigger;
 	},
 ) {
 	const jobInfo: DbJobResult = {
 		date: options.date.toISOString(),
+		trigger: options.trigger,
 		info: options.info,
 	};
 

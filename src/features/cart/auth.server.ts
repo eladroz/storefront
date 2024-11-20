@@ -1,4 +1,4 @@
-import type { AstroCookies } from 'astro';
+import type { APIContext, AstroCookies } from 'astro';
 import jwt from 'jsonwebtoken';
 
 type TokenPayload =
@@ -31,15 +31,35 @@ export function verifyPassword(input: string): boolean {
 	return input === BASIC_PASSWORD;
 }
 
+export function verifyAPICall(context: APIContext) {
+	const BEARER_TOKEN_REGEX = /^bearer\s+(?<token>[^\s]+)$/i;
+	const authHeaderValue = context.request.headers.get('Authorization');
+	if (authHeaderValue) {
+		const bearerToken = authHeaderValue.trim().match(BEARER_TOKEN_REGEX)?.groups?.token;
+		return verifyToken(bearerToken);
+	} else {
+		return verifySession(context.cookies);
+	}
+}
+
 export function verifySession(cookies: AstroCookies) {
 	if (authConfigError()) return false;
 	const token = cookies.get(SESSION_COOKIE_NAME)?.value;
-	if (!token) return false;
-
-	const decoded = jwt.verify(token, JWT_SECRET!) as TokenPayload;
-	const result = !!decoded && decoded.loggedIn === true;
+	const result = verifyToken(token);
 	console.log('Session verified:', result);
 	return result;
+}
+
+function verifyToken(token?: string) {
+	if (!token) return false;
+	try {
+		const decoded = jwt.verify(token, JWT_SECRET!) as TokenPayload;
+		const result = !!decoded && decoded.loggedIn === true;
+		return result;
+	} catch (e) {
+		console.error(`verifyToken: ${(e as Error).message}`);
+		return false;
+	}
 }
 
 export function createVerifiedSession(cookies: AstroCookies) {

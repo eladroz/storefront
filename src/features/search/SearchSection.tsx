@@ -10,7 +10,7 @@ import { CgPokemon } from 'solid-icons/cg';
 
 // TODO detect this from Astro config and expose as public env var to client. Use undefined for
 // serving original images, if running in dev without Netlify CLI (netlify dev)
-const imageCDN = undefined; //'netlify';
+const imageCDN = 'netlify';
 
 export function SearchSection(props: { withMutations?: boolean }) {
 	const [queryText, setQueryText] = createSignal('');

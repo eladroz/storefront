@@ -1,6 +1,6 @@
 import { ONE_DAY } from '../config.ts';
 
-const DISABLE_CDN_CACHE = process.env.DISABLE_CDN_CACHE?.toLowerCase() === 'true';
+const DISABLE_CDN_CACHE = import.meta.env.DISABLE_CDN_CACHE?.toLowerCase() === 'true';
 
 export type CacheTagOptions = {
 	productIds?: string[];

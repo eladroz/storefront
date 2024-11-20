@@ -1,10 +1,5 @@
 import type { AstroCookies } from 'astro';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET, BASIC_PASSWORD } from 'astro:env/server';
-
-const SESSION_COOKIE_NAME = 'session';
-const JWT_SECRET_MIN_LENGTH = 32;
-const PASSWORD_MIN_LENGTH = 8;
 
 type TokenPayload =
 	| undefined
@@ -12,14 +7,28 @@ type TokenPayload =
 			loggedIn: boolean;
 	  };
 
+const BASIC_PASSWORD = import.meta.env.BASIC_PASSWORD;
+const JWT_SECRET = import.meta.env.JWT_SECRET;
+const SESSION_COOKIE_NAME = 'basic_session';
+
+const validations = [
+	{ k: 'JWT_SECRET', v: JWT_SECRET, minLength: 32 },
+	{ k: 'BASIC_PASSWORD', v: BASIC_PASSWORD, minLength: 8 },
+];
+
 export function authConfigError() {
-	if (!JWT_SECRET || JWT_SECRET.length < JWT_SECRET_MIN_LENGTH) {
-		return `JWT_SECRET should be set to at least ${JWT_SECRET_MIN_LENGTH} characters`;
-	} else if (!BASIC_PASSWORD || BASIC_PASSWORD.length < PASSWORD_MIN_LENGTH) {
-		return `BASIC_PASSWORD should be set to at least ${PASSWORD_MIN_LENGTH} characters`;
-	} else {
-		return;
+	for (const { k, v, minLength } of validations) {
+		const actualLength = v?.length || 0;
+		if (actualLength < minLength) {
+			return `${k} should be at least ${minLength} characters long, is ${actualLength} characters`;
+		}
 	}
+	return undefined;
+}
+
+export function verifyPassword(input: string): boolean {
+	if (authConfigError()) return false;
+	return input === BASIC_PASSWORD;
 }
 
 export function verifySession(cookies: AstroCookies) {

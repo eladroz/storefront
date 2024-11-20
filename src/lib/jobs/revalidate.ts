@@ -4,7 +4,7 @@ import { purgeCache } from '@netlify/functions';
 import { REVALIDATE_JOB } from '~/config.ts';
 import { getJobStatus, saveJobStatus, makeResponse } from './index.ts';
 
-const SITE_ID = process.env.SITE_ID;
+const SITE_ID = import.meta.env.SITE_ID;
 const MAX_TAGS_TO_PURGE = 100;
 
 async function getModifiedTags(sinceDate: Date) {

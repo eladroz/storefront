@@ -1,10 +1,10 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro:content';
-import { BASIC_PASSWORD } from 'astro:env/server';
 import {
 	authConfigError,
 	clearSession,
 	createVerifiedSession,
+	verifyPassword,
 	verifySession,
 } from '~/features/cart/auth.server.ts';
 
@@ -21,7 +21,7 @@ export const auth = {
 				throw new ActionError({ code: 'INTERNAL_SERVER_ERROR' });
 			}
 
-			if (password === BASIC_PASSWORD) {
+			if (verifyPassword(password)) {
 				createVerifiedSession(ctx.cookies);
 				return;
 			} else {
